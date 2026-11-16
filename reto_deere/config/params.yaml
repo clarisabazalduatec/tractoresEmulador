@@ -1,0 +1,41 @@
+field:
+  size: 15
+  obstacle_density: 0.0        # fracción de celdas con roca (0.0, 0.05, 0.10)
+  gas_station: [14, 4]         # (fila, columna)
+  seed_station: [14, 10]
+tractors:
+  count: 3
+  starts: [[0, 0], [0, 5], [0, 10]]
+  initial_direction: S
+  seed_capacity: 30
+  fuel_capacity: 80.0
+costs:
+  move: 1.0
+  turn: 0.5                    # extra por cambiar de dirección
+  wait: 0.1
+refuel:
+  margin: 5.0                  # margen de la restricción C5
+coordination:
+  allow_collisions: false      # lo fija cada arquitectura (ver abajo)
+  random_tiebreak: true        # desempate aleatorio; false = prioridad fija por id
+architectures:
+  baseline: {allow_collisions: true}    # sin blackboard: las colisiones se detectan y cuentan
+  improved: {allow_collisions: false}   # con blackboard: reservas, bloqueo de conflictos
+dispatch:
+  seed_threshold: 2
+sim:
+  max_ticks: 3000              # tope para casos donde la línea base no termina
+  base_seed: 42
+  repetitions: 20
+  record_telemetry: true
+objective_weights:             # se calibran en la semana 3
+  lambda1: 1.0                 # T_total
+  lambda2: 0.5                 # D_total
+  lambda3: 1000.0              # N_colisiones
+  lambda4: 0.5                 # W_espera
+  lambda5: 0.2                 # E_combustible
+  lambda6: 1.0                 # Δ_balance
+scenarios:
+  sin_obstaculos: 0.0
+  densidad_baja: 0.05
+  densidad_alta: 0.10
