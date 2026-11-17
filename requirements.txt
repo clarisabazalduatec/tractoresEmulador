@@ -6,3 +6,4 @@ matplotlib>=3.7  # se usa desde la etapa 4
 pandas>=2.0
 scipy>=1.10
 jupyter
+tabulate>=0.9
