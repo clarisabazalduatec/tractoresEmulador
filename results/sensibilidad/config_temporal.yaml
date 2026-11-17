@@ -1,0 +1,53 @@
+architectures:
+  baseline:
+    allow_collisions: true
+  improved:
+    allow_collisions: false
+coordination:
+  allow_collisions: false
+  random_tiebreak: true
+costs:
+  move: 1.0
+  turn: 0.5
+  wait: 0.1
+dispatch:
+  seed_threshold: 10
+field:
+  gas_station:
+  - 14
+  - 4
+  obstacle_density: 0.0
+  seed_station:
+  - 14
+  - 10
+  size: 15
+objective_weights:
+  lambda1: 1.0
+  lambda2: 0.5
+  lambda3: 1000.0
+  lambda4: 0.5
+  lambda5: 0.2
+  lambda6: 1.0
+refuel:
+  margin: 5.0
+scenarios:
+  densidad_alta: 0.1
+  densidad_baja: 0.05
+  sin_obstaculos: 0.0
+sim:
+  base_seed: 42
+  max_ticks: 3000
+  record_telemetry: true
+  repetitions: 20
+tractors:
+  count: 3
+  fuel_capacity: 80.0
+  initial_direction: S
+  seed_capacity: 30
+  starts:
+  - - 0
+    - 0
+  - - 0
+    - 5
+  - - 0
+    - 10

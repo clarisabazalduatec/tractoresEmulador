@@ -96,7 +96,7 @@ python -m experiments.stage4 --seeds 2 --output results/smoke
 
 ## Resultados experimentales (etapa 4)
 
-Se ejecutaron 120 episodios con el diseño anterior. Los resultados se basan en los archivos CSV de la segunda revisión.
+Se ejecutaron 120 episodios (2 arquitecturas × 3 densidades × 20 semillas). Los resultados provienen de results/stage4/episodes.csv.
 
 | Obstáculos | Baseline: completados | Improved: completados | Ticks promedio baseline | Ticks promedio improved |
 |---|---:|---:|---:|---:|
@@ -113,9 +113,28 @@ Se ejecutaron 120 episodios con el diseño anterior. Los resultados se basan en 
 
 Consulta el reporte final del proyecto para la explicación metodológica, la interpretación de las métricas y las limitaciones.
 
+### Visualizaciones adicionales
+
+visualizaciones.py y sensibilidad_J.py requieren haber generado antes results/stage4/episodes.csv; secuencia_estados.py y sensibilidad.py simulan por su cuenta. 
+
+```bash
+python -m experiments.visualizaciones
+python -m experiments.secuencia_estados
+python -m experiments.sensibilidad
+python -m experiments.sensibilidad_J
+```
+
+| Script | Qué hace | Salida |
+|---|---|---|
+| `visualizaciones.py` | Evolución temporal de la cobertura (baseline vs improved), mapa 2D final y distribución de ticks | `results/visualizaciones/` |
+| `secuencia_estados.py` | Simula un episodio (improved, 10 %, semilla 0) y dibuja el mapa en 4 momentos con las trayectorias de los tractores | `results/visualizaciones/secuencia_estados.png` |
+| `sensibilidad.py` | Simula 120 episodios variando la capacidad de combustible (ambas arquitecturas) y el umbral de semillas (improved) al 10 % de obstáculos | `results/sensibilidad/` |
+| `sensibilidad_J.py` | Recalcula J con distintos pesos de colisiones usando `episodes.csv`, sin simular de nuevo | `results/sensibilidad/sensibilidad_pesos_J.csv` y `.png` |
+
 ## Estructura del repositorio
 
 ```text
+
 .
 ├── config/
 │   └── params.yaml            # Campo, tractores, costes y pesos
@@ -132,8 +151,13 @@ Consulta el reporte final del proyecto para la explicación metodológica, la in
 │   ├── quick_run.py
 │   ├── validate_stage3.py
 │   ├── diagnose_deadlock.py
-│   └── stage4.py
+│   ├── stage4.py
+│   ├── visualizaciones.py
+│   ├── secuencia_estados.py
+│   ├── sensibilidad.py
+│   └── sensibilidad_J.py
 ├── tests/                     # Pruebas unitarias e integración
+├── results/                   # Salidas generadas (CSV y figuras)
 ├── requirements.txt
 └── pytest.ini
 ```
@@ -154,7 +178,16 @@ Donde `T` son ticks, `D` distancia, `C` colisiones, `W` esperas, `E` combustible
 - No cambiar los parámetros entre ejecuciones que se pretendan comparar directamente.
 - El límite de 3000 ticks **censura** los tiempos de episodios incompletos.
 - El modelo es discreto e idealizado; sus resultados **no prueban desempeño en maquinaria real**.
-- Los CSV de métricas finales no permiten reconstruir trayectorias completas por tick.
+- Los CSV de métricas finales no permiten reconstruir trayectorias por tick. Para ver la evolución temporal y las trayectorias se vuelve a simular un episodio concreto con `visualizaciones.py` y `secuencia_estados.py`, sin modificar las reglas del modelo.
+- Los barridos de sensibilidad usan 10 semillas y un solo nivel de obstáculos (10 %); sus resultados son exploratorios y no sustituyen el experimento principal de 20 semillas.
+
+### Sensibilidad
+
+- Capacidad de combustible: Con 60 unidades, improved se bloquea (3/10 completados) mientras que baseline sigue operando (341 ticks). Con 100 y 120, improved completa todo pero pierde su ventaja en velocidad frente a baseline (315 vs. 261 y 305 vs. 240 ticks) debido al costo de coordinación. Su superioridad temporal depende estrictamente de las 80 unidades actuales.
+
+- Umbral de semillas: Todas completan el 100 %. Un umbral de 5 da el mejor tiempo medio (improved en 258 ticks vs. 277 actuales), aunque con desviaciones de 25–30 ticks la diferencia no es concluyente. Subirlo a 10 sí empeora el rendimiento (326 ticks) por visitas excesivas a S.
+
+- Peso de colisiones en J: Improved supera a baseline desde $\lambda_3 = 0$ en todas las densidades. No obstante, con 10 % de obstáculos y pesos bajos ($\lambda_3 \le 1$), solo gana en el 75 %–80 % de los pares, alcanzando el 100 % de efectividad a partir de $\lambda_3 \ge 100$.
 
 ## Documentación
 
