@@ -23,7 +23,7 @@ El planificador **A\*** tiene en cuenta distancia y cambios de orientación. El 
 - Python 3 compatible con las dependencias del proyecto.
 - `pip` y `venv`.
 - Dependencias indicadas en `requirements.txt`.
-- **`tabulate`** para generar `REPORT.md` con `pandas.DataFrame.to_markdown()` (si no está en `requirements.txt`, instalarlo por separado).
+- `tabulate` para generar `REPORT.md` con `pandas.DataFrame.to_markdown()`; se instala junto con las demás dependencias.
 
 ### Instalación
 
@@ -34,7 +34,6 @@ python -m venv .venv
 source .venv/bin/activate  # Linux/macOS
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python -m pip install tabulate
 ```
 
 En Windows (PowerShell), activar con `.venv\Scripts\Activate.ps1`.
@@ -92,6 +91,22 @@ python -m experiments.stage4 \
 
 ```bash
 python -m experiments.stage4 --seeds 2 --output results/smoke
+```
+
+### Dashboard en Jupyter
+
+Abre `notebooks/dashboard_experimentos.ipynb` desde la raíz del repositorio o ejecuta:
+
+```bash
+jupyter lab notebooks/dashboard_experimentos.ipynb
+```
+
+Por defecto, el notebook usa los CSV existentes, reconstruye las gráficas sin volver a correr las simulaciones y muestra las visualizaciones guardadas en `results/`. Activa `REBUILD_STAGE4_FROM_CSV` para recalcular las tablas y el informe; activa `RUN_FULL_STAGE4_SIMULATION` para correr los 120 episodios desde cero. También puedes regenerar las visualizaciones complementarias, ejecutar `quick_run`, validar la etapa 3 o correr el diagnóstico desde la celda de configuración.
+
+El script `experiments.visualizaciones` genera gráficos de evolución temporal, mapa del campo y distribución de ticks:
+
+```bash
+python -m experiments.visualizaciones
 ```
 
 ## Resultados experimentales (etapa 4)

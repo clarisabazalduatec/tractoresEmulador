@@ -149,7 +149,7 @@ def plot_effects(pairs, path):
         ax.set_xticks(range(len(subset)), [f'{d:.0%}' for d in subset.density])
         ax.set_title(metric)
         ax.set_xlabel('Densidad de obstáculos')
-        ax.set_ylabel('Mejora improved - baseline')
+        ax.set_ylabel('Mejora (positivo favorece improved)')
         ax.grid(alpha=.15)
     fig.suptitle('Diferencias pareadas con IC 95 % (positivo favorece improved)')
     fig.savefig(path, dpi=160, bbox_inches='tight')
