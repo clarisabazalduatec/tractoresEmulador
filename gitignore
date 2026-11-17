@@ -1,0 +1,59 @@
+# Python bytecode y cachés
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# Build y empaquetado
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE y sistema operativo
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Resultados generados de experimentos (no datos fuente)
+results/
+outputs/
+
+# Archivos temporales y logs
+*.log
+*.tmp
+*.bak
+.cache/
+
+# Artefactos de renderizado local
+report_render/
