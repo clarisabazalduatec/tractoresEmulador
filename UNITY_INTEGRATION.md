@@ -2,7 +2,7 @@
 
 ## Cómo funcionan los proyectos y qué comunicación existía
 
-El repositorio Python ejecuta una simulación AgentPy del campo y tres tractores. `FarmModel` obtiene decisiones de los agentes, el Blackboard coordina la arquitectura improved, el planificador conserva A* y `WorldState` valida y aplica cada tick. El estado del mundo contiene obstáculos, estaciones, combustible, semillas y la matriz de siembra. Q-learning está en desarrollo paralelo y todavía no forma parte de la versión publicada de este modelo.
+El repositorio Python ejecuta una simulación AgentPy del campo y tres tractores. `FarmModel` obtiene decisiones de los agentes, el Blackboard coordina la arquitectura improved, el planificador conserva A* y `WorldState` valida y aplica cada tick. El estado del mundo contiene obstáculos, estaciones, combustible, semillas y la matriz de siembra. Q-learning es una opción de evaluación para decidir el reabastecimiento de semillas de cada tractor.
 
 Unity ya contiene una escena de campo 15×15, tractores, celdas, obstáculos, estaciones y `ComunicacionPython.cs`. La comunicación anterior era un demo FastAPI separado en `ServidorPython/api_unity.py`: cada GET a `/estado` avanzaba una ruta corta codificada a mano y solo enviaba posiciones. No conectaba con `FarmModel`; el archivo de obstáculos de la escena tampoco coincide con las rocas generadas por Python para seed 0.
 
@@ -52,10 +52,12 @@ El snapshot completo siempre incluye los tres tractores y todas las celdas sembr
 Desde la raíz de `Reto_Multiagentes`, con dependencias de `requirements.txt` instaladas:
 
 ```powershell
-.\.venv\Scripts\python.exe -m src.unity_server --architecture improved --density 0.10 --seed 0
+.\.venv\Scripts\python.exe -m src.unity_server --architecture improved --density 0.10 --seed 0 --q-policies config/qlearning_demo_policies.json
 ```
 
-Cuando se integre al repositorio la implementación de Q-learning compatible, se podrá suministrar una política entrenada con `--q-policies RUTA`. Esa opción es para evaluación y requiere la implementación y el archivo de políticas; ninguno se incluye en este PR. Mientras tanto, el escenario usa la política improved existente y A*.
+El comando activa Q-learning en modo de evaluación, sin exploración ni entrenamiento, usando tres tablas ya entrenadas. Para utilizar otra política, proporciona su ruta con `--q-policies`; para comparar con la política improved original, omite esa opción. La API informa el estado real en `scenario.q_learning` y Unity lo muestra en pantalla.
+
+Las tablas de demostración provienen del experimento local `qlearning_experiment_v3`: 20 semillas de entrenamiento por cada una de las tres densidades de obstáculos. Son una política experimental para reproducir la visualización, no una garantía de mejor desempeño. Se pueden generar nuevas tablas mediante `python -m experiments.train_qlearning` o evaluar mediante `python -m experiments.evaluate_qlearning`.
 
 En Unity, con el servidor Python activo:
 
