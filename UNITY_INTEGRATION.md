@@ -47,9 +47,22 @@ Un snapshot tiene este formato:
 
 El snapshot completo siempre incluye los tres tractores y todas las celdas sembradas hasta ese tick. Unity representa posiciones, estados/recursos, obstáculos, estaciones y siembra; no calcula destinos ni aplica reglas.
 
-## Ejecución reproducible
+## Ejecutar la demostración preparada en Windows
 
-Desde la raíz de `Reto_Multiagentes`, con dependencias de `requirements.txt` instaladas:
+El repositorio incluye las tres tablas entrenadas en `config/qlearning_demo_policies.json` y un lanzador que las activa automáticamente. No es necesario entrenar de nuevo ni copiar una política desde la computadora de desarrollo.
+
+1. Instala Python 3 en Windows si aún no está instalado.
+2. Desde el Explorador, ejecuta `run_unity_demo.bat` en la raíz del repositorio Python. La primera ejecución crea `.venv` e instala solo las dependencias del servidor; las siguientes reutilizan ese entorno.
+3. Deja abierta la ventana del servidor. Abre `Assets/Scenes/SampleScene.unity` en el proyecto Unity y pulsa Play.
+4. La simulación inicia con arquitectura `improved`, densidad de obstáculos del 10 %, semilla `0` y Q-learning activado. El HUD de Unity lo confirma. Para detener el servidor, pulsa Ctrl+C en su ventana.
+
+El servidor de Python controla las decisiones de los tractores. Unity solicita el estado inicial y luego avanza un tick por cada actualización visual; no replica las decisiones de Q-learning, A* ni las reglas del mundo.
+
+También se puede ejecutar `run_unity_demo.ps1` desde PowerShell. En otro sistema operativo, instala las dependencias de `requirements-unity.txt` y ejecuta el comando manual siguiente desde la raíz del repositorio.
+
+## Ejecución manual reproducible
+
+Desde la raíz de `Reto_Multiagentes`, con dependencias de `requirements-unity.txt` instaladas:
 
 ```powershell
 .\.venv\Scripts\python.exe -m src.unity_server --architecture improved --density 0.10 --seed 0 --q-policies config/qlearning_demo_policies.json
