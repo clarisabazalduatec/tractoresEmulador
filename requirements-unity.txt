@@ -1,0 +1,4 @@
+# Dependencias necesarias para ejecutar el servidor de la simulación en Unity.
+# AgentPy instala sus dependencias transitivas (NumPy, SciPy, pandas, etc.).
+agentpy>=0.1.5
+pyyaml>=6.0
