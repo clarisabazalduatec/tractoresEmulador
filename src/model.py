@@ -12,7 +12,7 @@ from .improved import ImprovedTractor
 from .blackboard import Blackboard
 from .planner import strips, zigzag_order
 from .rules import WorldState, objective
-from .world import build_field, load_params, validate_params
+from .world import build_field, choose_start_positions, load_params, validate_params
 from .qlearning import SeedPolicy
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent.parent / "config" / "params.yaml"
@@ -28,17 +28,26 @@ class FarmModel(ap.Model):
         cfg["coordination"].update(cfg["architectures"][arch])
         if "obstacle_density" in self.p:
             cfg["field"]["obstacle_density"] = float(self.p["obstacle_density"])
+        start_mode = self.p.get("start_mode", "fixed")
+        if start_mode not in ("fixed", "random"):
+            raise ValueError("start_mode debe ser 'fixed' o 'random'")
         validate_params(cfg)
         self.cfg, self.arch = cfg, arch
+        self.start_mode = start_mode
         if self.p.get('q_enabled', False) and arch != 'improved':
             raise ValueError('Q-learning requiere la arquitectura improved')
         if self.p.get('q_enabled', False):
             self.q_policies = self.p.get('q_policies') or [SeedPolicy(seed=i) for i in range(cfg['tractors']['count'])]
             if len(self.q_policies) != cfg['tractors']['count']:
                 raise ValueError('Se requiere una política por tractor')
-        field = build_field(cfg, rng=self.nprandom)
-        self.world = WorldState(field, cfg, rng=self.nprandom)
+        protected_starts = cfg["tractors"]["starts"] if start_mode == "fixed" else ()
+        field = build_field(cfg, rng=self.nprandom, protected_starts=protected_starts)
         n = cfg["tractors"]["count"]
+        starts = choose_start_positions(field, cfg["tractors"]["starts"], n,
+                                        self.nprandom, start_mode)
+        cfg["tractors"]["starts"] = [list(cell) for cell in starts]
+        self.start_positions = starts
+        self.world = WorldState(field, cfg, rng=self.nprandom)
         self.agents = ap.AgentList(self, n, AGENT_CLASSES[arch])
         for i, (agent, cols) in enumerate(zip(self.agents, strips(field.size, n)), start=1):
             agent.tid = i
@@ -80,6 +89,10 @@ class FarmModel(ap.Model):
         self.report("completo", bool(w.is_done()))
         self.report("celdas_sembrables", len(w.field.sowable))
         self.report("obstaculos", len(w.field.obstacles))
+        self.report("modo_inicio", self.start_mode)
+        for i, (row, col) in enumerate(self.start_positions, start=1):
+            self.report(f"inicio_T{i}_fila", row)
+            self.report(f"inicio_T{i}_columna", col)
         if self.arch == "improved":
             self.report("subastas", self.blackboard.auctions)
 

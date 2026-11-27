@@ -115,11 +115,50 @@ def generate_obstacles(size, density, rng, protected, gas, seed_station, max_att
     raise RuntimeError("no se pudo generar un mapa conectado; baja la densidad")
 
 
-def build_field(params: dict, rng=None, obstacles=None) -> Field:
+def build_field(params: dict, rng=None, obstacles=None, protected_starts=None) -> Field:
     f = params["field"]
     if obstacles is None:
         rng = rng if rng is not None else np.random.default_rng(params["sim"]["base_seed"])
+        protected = (params["tractors"]["starts"] if protected_starts is None
+                     else protected_starts)
         obstacles = generate_obstacles(f["size"], f["obstacle_density"], rng,
-                                       params["tractors"]["starts"],
+                                       protected,
                                        f["gas_station"], f["seed_station"])
     return Field(f["size"], f["gas_station"], f["seed_station"], obstacles)
+
+
+def choose_start_positions(field: Field, fixed_starts, count: int, rng,
+                           mode: str = "fixed") -> tuple[tuple[int, int], ...]:
+    """Choose valid starts after the seeded field has been generated.
+
+    Random starts are drawn only from cells reachable from both stations. The
+    caller passes AgentPy's seeded generator so map and positions are reproducible.
+    """
+    if mode not in ("fixed", "random"):
+        raise ValueError("start_mode debe ser 'fixed' o 'random'")
+    if count < 1:
+        raise ValueError("se requiere al menos un tractor")
+
+    if mode == "fixed":
+        starts = tuple(tuple(cell) for cell in fixed_starts)
+    else:
+        from_gas = set(field.bfs_dist(field.gas))
+        from_seeds = set(field.bfs_dist(field.seed_station))
+        candidates = sorted(field.sowable & from_gas & from_seeds)
+        if len(candidates) < count:
+            raise ValueError(
+                f"solo hay {len(candidates)} celdas accesibles para {count} tractores"
+            )
+        indices = rng.choice(len(candidates), size=count, replace=False)
+        starts = tuple(candidates[int(index)] for index in indices)
+
+    stations = {field.gas, field.seed_station}
+    if len(starts) != count or len(set(starts)) != count:
+        raise ValueError("las posiciones iniciales deben ser distintas y cubrir todos los tractores")
+    if any(not field.in_bounds(cell) or not field.passable(cell) or cell in stations
+           for cell in starts):
+        raise ValueError("las posiciones iniciales deben ser transitables y no ocupar estaciones")
+    if any(cell not in field.bfs_dist(field.gas)
+           or cell not in field.bfs_dist(field.seed_station) for cell in starts):
+        raise ValueError("todas las posiciones iniciales deben ser accesibles desde ambas estaciones")
+    return starts
