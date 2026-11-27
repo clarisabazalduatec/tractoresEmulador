@@ -1,0 +1,73 @@
+# Integración Python–Unity
+
+## Cómo funcionan los proyectos y qué comunicación existía
+
+El repositorio Python ejecuta una simulación AgentPy del campo y tres tractores. `FarmModel` obtiene decisiones de los agentes, el Blackboard coordina la arquitectura improved, el planificador conserva A* y `WorldState` valida y aplica cada tick. El estado del mundo contiene obstáculos, estaciones, combustible, semillas y la matriz de siembra. Q-learning está en desarrollo paralelo y todavía no forma parte de la versión publicada de este modelo.
+
+Unity ya contiene una escena de campo 15×15, tractores, celdas, obstáculos, estaciones y `ComunicacionPython.cs`. La comunicación anterior era un demo FastAPI separado en `ServidorPython/api_unity.py`: cada GET a `/estado` avanzaba una ruta corta codificada a mano y solo enviaba posiciones. No conectaba con `FarmModel`; el archivo de obstáculos de la escena tampoco coincide con las rocas generadas por Python para seed 0.
+
+## Protocolo nuevo
+
+`src/unity_server.py` es un adaptador de transporte. No duplica políticas ni modifica Blackboard, A*, reglas, mundo o agentes. El servidor crea una instancia del modelo y usa sus métodos AgentPy existentes `sim_setup` y `sim_step`.
+
+- `GET /health`: comprueba que el servidor responde.
+- `GET /state`: devuelve el snapshot actual sin avanzar el modelo. El primer snapshot es tick 0.
+- `POST /step`: hace que Python avance exactamente un tick y devuelve el nuevo snapshot. Al finalizar el episodio, responde con el último estado sin avanzar más.
+
+Python conserva la autoridad sobre las decisiones y el avance de los ticks. Unity controla el ritmo visual al enviar `POST /step` desde el presentador; el intervalo de reproducción no cambia la lógica de simulación. `complete` indica cobertura completa; `finished` indica que el episodio se detuvo por cobertura o por alcanzar el máximo de ticks.
+
+Los cuerpos JSON usan `row` y `col` (fila y columna), como Python. La grilla de Unity usa `x = col`, `z = row`, con paso de una unidad y origen `(0,0)`. Por ejemplo, la gasolinera `(14,4)` se representa en Unity en `(x=4,z=14)`.
+
+Un snapshot tiene este formato:
+
+```json
+{
+  "schema_version": 1,
+  "scenario": {"architecture": "improved", "obstacle_density": 0.0, "seed": 0, "q_learning": false},
+  "tick": 0,
+  "complete": false,
+  "finished": false,
+  "field": {
+    "rows": 15,
+    "columns": 15,
+    "coordinate_order": ["row", "col"],
+    "obstacles": [],
+    "stations": {"gas": {"row": 14, "col": 4}, "seeds": {"row": 14, "col": 10}},
+    "sowable_count": 223
+  },
+  "planted": [],
+  "tractors": [
+    {"id": 1, "row": 0, "col": 0, "direction": "S", "seeds": 30.0, "fuel": 80.0, "mode": "esperando"},
+    {"id": 2, "row": 0, "col": 5, "direction": "S", "seeds": 30.0, "fuel": 80.0, "mode": "esperando"},
+    {"id": 3, "row": 0, "col": 10, "direction": "S", "seeds": 30.0, "fuel": 80.0, "mode": "esperando"}
+  ],
+  "metrics": {"coverage_pct": 0.0, "collisions": 0, "rejected_actions": 0}
+}
+```
+
+El snapshot completo siempre incluye los tres tractores y todas las celdas sembradas hasta ese tick. Unity representa posiciones, estados/recursos, obstáculos, estaciones y siembra; no calcula destinos ni aplica reglas.
+
+## Ejecución reproducible
+
+Desde la raíz de `Reto_Multiagentes`, con dependencias de `requirements.txt` instaladas:
+
+```powershell
+.\.venv\Scripts\python.exe -m src.unity_server --architecture improved --density 0.10 --seed 0
+```
+
+Cuando se integre al repositorio la implementación de Q-learning compatible, se podrá suministrar una política entrenada con `--q-policies RUTA`. Esa opción es para evaluación y requiere la implementación y el archivo de políticas; ninguno se incluye en este PR. Mientras tanto, el escenario usa la política improved existente y A*.
+
+En Unity, con el servidor Python activo:
+
+1. Abre `Assets/Scenes/SampleScene.unity`, que tiene `FarmSimulationBridge` agregado a `ConexionPython`.
+2. Pulsa Play. La escena consulta el tick inicial y avanza automáticamente cada 0.5 segundos. El HUD permite pausar, reanudar y pedir el siguiente tick manualmente.
+
+El modelo del tractor apunta hacia su eje local +X; el presentador corrige su orientación -90° y lo gira antes de desplazarlo. Las estaciones y los obstáculos se representan según el snapshot durante Play Mode. Los botones de cámara permiten elegir la vista orbital, la panorámica o el seguimiento de cada tractor. Los modelos de árboles, animales y cielo requieren los paquetes detallados en `ASSET_STORE_DEPENDENCIES.md` del proyecto Unity.
+
+## Escenario de referencia Week 2
+
+Sin `--q-policies`, la combinación `improved`, densidad `0.10`, seed `0` reproduce el episodio de la visualización temporal: 22 obstáculos, 201 celdas sembrables y finalización en tick 269. Al activar Q-learning, las decisiones y el tick final pueden cambiar. El servidor entrega snapshots por tick; los CSV de métricas finales no se usan para inferir trayectorias.
+
+## Verificación y límites
+
+Se validó en la sesión actual que el modelo termina el escenario seed 0 / 10 % con 201 celdas sembradas en 269 ticks. El protocolo expone el estado inicial y avance de un solo tick para que Unity solicite y represente cada transición. El servidor enlaza por defecto a `127.0.0.1`; una instancia Unity en otro equipo necesitaría una dirección accesible y una configuración de red apropiada. El demo antiguo de `ServidorPython` no forma parte de este adaptador.
