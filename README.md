@@ -215,3 +215,5 @@ Proyecto académico del reto John Deere para la materia de sistemas multiagente.
 ## Demostración de tractores entrenados en Unity
 
 Para iniciar el escenario reproducible de Unity con las tablas entrenadas incluidas, ejecuta `run_unity_demo.bat` en Windows y después pulsa Play en `Assets/Scenes/SampleScene.unity` del proyecto Unity. El lanzador prepara las dependencias del servidor en el primer uso. Los pasos, el formato de comunicación y el comando manual están en [UNITY_INTEGRATION.md](UNITY_INTEGRATION.md).
+
+En la pantalla de configuración de Unity se puede seleccionar la densidad, semilla, arquitectura, Q-learning y posiciones iniciales fijas o aleatorias. Para evaluaciones Q-learning con inicios aleatorios y los resultados de referencia, consulta [docs/EVALUACION_QLEARNING_INICIOS_ALEATORIOS.md](docs/EVALUACION_QLEARNING_INICIOS_ALEATORIOS.md).

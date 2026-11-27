@@ -10,9 +10,12 @@ Unity ya contiene una escena de campo 15×15, tractores, celdas, obstáculos, es
 
 `src/unity_server.py` es un adaptador de transporte. No duplica políticas ni modifica Blackboard, A*, reglas, mundo o agentes. El servidor crea una instancia del modelo y usa sus métodos AgentPy existentes `sim_setup` y `sim_step`.
 
+El puente usa HTTP y la biblioteca estándar de Python; queda independiente de OpenClaw y MCP.
+
 - `GET /health`: comprueba que el servidor responde.
 - `GET /state`: devuelve el snapshot actual sin avanzar el modelo. El primer snapshot es tick 0.
 - `POST /step`: hace que Python avance exactamente un tick y devuelve el nuevo snapshot. Al finalizar el episodio, responde con el último estado sin avanzar más.
+- `POST /reset`: crea un episodio nuevo con la configuración recibida y devuelve el snapshot real del tick 0. Si se omite un campo, conserva el valor configurado en la sesión.
 
 Python conserva la autoridad sobre las decisiones y el avance de los ticks. Unity controla el ritmo visual al enviar `POST /step` desde el presentador; el intervalo de reproducción no cambia la lógica de simulación. `complete` indica cobertura completa; `finished` indica que el episodio se detuvo por cobertura o por alcanzar el máximo de ticks.
 
@@ -23,7 +26,7 @@ Un snapshot tiene este formato:
 ```json
 {
   "schema_version": 1,
-  "scenario": {"architecture": "improved", "obstacle_density": 0.0, "seed": 0, "q_learning": false},
+  "scenario": {"architecture": "improved", "density": 0.0, "obstacle_density": 0.0, "seed": 0, "start_mode": "fixed", "initial_positions": "fixed", "q_learning": false, "max_ticks": 3000},
   "tick": 0,
   "complete": false,
   "finished": false,
@@ -47,6 +50,33 @@ Un snapshot tiene este formato:
 
 El snapshot completo siempre incluye los tres tractores y todas las celdas sembradas hasta ese tick. Unity representa posiciones, estados/recursos, obstáculos, estaciones y siembra; no calcula destinos ni aplica reglas.
 
+## Configuración y reproducibilidad de episodios
+
+`POST /reset` recibe un objeto JSON. Unity envía los parámetros elegidos en su pantalla inicial:
+
+```json
+{
+  "density": 0.05,
+  "seed": 211,
+  "start_mode": "random",
+  "q_learning": true,
+  "architecture": "improved"
+}
+```
+
+`density` acepta una fracción entre 0 y menor que 0.5; en la interfaz se muestra como porcentaje. `seed` es un entero. `start_mode` acepta `fixed` o `random`; también se admite el alias `initial_positions` por compatibilidad. `q_learning` es booleano y solo puede activarse en `improved` con una política cargada al iniciar el servidor. Los campos de respuesta `density`/`obstacle_density` y `start_mode`/`initial_positions` son aliases. Las posiciones iniciales reales están en `tractors` del snapshot tick 0.
+
+Python sigue siendo autoridad del mapa y los agentes. La misma semilla inicializa el generador de AgentPy: primero se generan los obstáculos y después, en modo aleatorio, se muestrean las celdas iniciales. Repetir densidad, semilla, arquitectura y modo reproduce mapa e inicios. Las posiciones aleatorias son distintas entre tractores, transitables, distintas de las estaciones y accesibles desde ambas estaciones. El modo `fixed` (predeterminado) conserva las coordenadas de `config/params.yaml` y no consume números aleatorios adicionales al elegirlas.
+
+`GET /state` no avanza ticks; `POST /step` avanza exactamente uno. El ritmo de reproducción continúa en Unity. Un reset construye el nuevo modelo antes de sustituir la sesión, para que Unity reciba el estado inicial completo antes de pedir pasos.
+
+Para probar el reset desde PowerShell mientras el servidor está activo:
+
+```powershell
+$body = @{ density = 0.05; seed = 211; start_mode = 'random'; q_learning = $true; architecture = 'improved' } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/reset -ContentType 'application/json' -Body $body
+```
+
 ## Ejecutar la demostración preparada en Windows
 
 El repositorio incluye las tres tablas entrenadas en `config/qlearning_demo_policies.json` y un lanzador que las activa automáticamente. No es necesario entrenar de nuevo ni copiar una política desde la computadora de desarrollo.
@@ -69,6 +99,8 @@ Desde la raíz de `Reto_Multiagentes`, con dependencias de `requirements-unity.t
 ```
 
 El comando activa Q-learning en modo de evaluación, sin exploración ni entrenamiento, usando tres tablas ya entrenadas. Para utilizar otra política, proporciona su ruta con `--q-policies`; para comparar con la política improved original, omite esa opción. La API informa el estado real en `scenario.q_learning` y Unity lo muestra en pantalla.
+
+Para iniciar directamente con posiciones aleatorias agrega `--start-mode random`. La semilla también determina las posiciones iniciales junto con el mapa.
 
 Las tablas de demostración provienen del experimento local `qlearning_experiment_v3`: 20 semillas de entrenamiento por cada una de las tres densidades de obstáculos. Son una política experimental para reproducir la visualización, no una garantía de mejor desempeño. Se pueden generar nuevas tablas mediante `python -m experiments.train_qlearning` o evaluar mediante `python -m experiments.evaluate_qlearning`.
 

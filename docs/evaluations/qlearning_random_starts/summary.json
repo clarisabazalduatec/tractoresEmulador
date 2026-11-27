@@ -1,0 +1,254 @@
+{
+  "metadata": {
+    "start_mode": "random",
+    "policy": "config\\qlearning_demo_policies.json",
+    "policy_sha256": "f846954c2402901633b3cea17285c7e5715dd14342576b9db69c0fa302371a2c",
+    "q_learning_training_during_evaluation": false,
+    "tick_limit": 3000,
+    "densities": [
+      0.0,
+      0.05,
+      0.1
+    ],
+    "eval_seeds": [
+      50000,
+      50001,
+      50002,
+      50003,
+      50004,
+      50005,
+      50006,
+      50007,
+      50008,
+      50009,
+      50010,
+      50011,
+      50012,
+      50013,
+      50014,
+      50015,
+      50016,
+      50017,
+      50018,
+      50019
+    ],
+    "paired_map_and_initial_positions": true,
+    "censoring_note": "Ticks-to-completion only uses pairs where both episodes complete. Other totals from tick-limited episodes are cumulative only through the limit."
+  },
+  "0.0": {
+    "pairs": 20,
+    "completed_improved_no_q": 19,
+    "completed_q_learning": 18,
+    "hit_tick_limit_improved_no_q": 1,
+    "hit_tick_limit_q_learning": 2,
+    "ticks_when_both_complete": {
+      "n_pairs": 18,
+      "improved_no_q_mean": 261.55555555555554,
+      "q_learning_mean": 259.3888888888889,
+      "paired_difference_q_minus_improved": -2.1666666666666665,
+      "median_difference": 7.0
+    },
+    "metrics_until_completion_or_limit": {
+      "cobertura_pct": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 99.97757847533632,
+        "q_learning_mean_until_completion_or_limit": 99.95515695067265,
+        "paired_difference_q_minus_improved": -0.022421524663677417,
+        "median_difference": 0.0
+      },
+      "distancia_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 514.4,
+        "q_learning_mean_until_completion_or_limit": 518.1,
+        "paired_difference_q_minus_improved": 3.7,
+        "median_difference": 21.5
+      },
+      "combustible_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 591.485,
+        "q_learning_mean_until_completion_or_limit": 608.315,
+        "paired_difference_q_minus_improved": 16.830000000000013,
+        "median_difference": 26.900000000000034
+      },
+      "espera_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 152.85,
+        "q_learning_mean_until_completion_or_limit": 280.15,
+        "paired_difference_q_minus_improved": 127.3,
+        "median_difference": 8.0
+      },
+      "colisiones": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "acciones_rechazadas": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "resiembras": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "visitas_S": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 6,
+        "q_learning_mean_until_completion_or_limit": 6.05,
+        "paired_difference_q_minus_improved": 0.05,
+        "median_difference": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "pairs": 20,
+    "completed_improved_no_q": 18,
+    "completed_q_learning": 20,
+    "hit_tick_limit_improved_no_q": 2,
+    "hit_tick_limit_q_learning": 0,
+    "ticks_when_both_complete": {
+      "n_pairs": 18,
+      "improved_no_q_mean": 277.1666666666667,
+      "q_learning_mean": 273.6666666666667,
+      "paired_difference_q_minus_improved": -3.5,
+      "median_difference": -1.0
+    },
+    "metrics_until_completion_or_limit": {
+      "cobertura_pct": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 97.24056603773585,
+        "q_learning_mean_until_completion_or_limit": 100.0,
+        "paired_difference_q_minus_improved": 2.759433962264151,
+        "median_difference": 0.0
+      },
+      "distancia_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 522.75,
+        "q_learning_mean_until_completion_or_limit": 530.75,
+        "paired_difference_q_minus_improved": 8,
+        "median_difference": 9.5
+      },
+      "combustible_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 628.71,
+        "q_learning_mean_until_completion_or_limit": 609.58,
+        "paired_difference_q_minus_improved": -19.130000000000017,
+        "median_difference": 12.249999999999943
+      },
+      "espera_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 584.3,
+        "q_learning_mean_until_completion_or_limit": 18.55,
+        "paired_difference_q_minus_improved": -565.75,
+        "median_difference": -3.0
+      },
+      "colisiones": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "acciones_rechazadas": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "resiembras": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "visitas_S": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 5.85,
+        "q_learning_mean_until_completion_or_limit": 6,
+        "paired_difference_q_minus_improved": 0.15,
+        "median_difference": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "pairs": 20,
+    "completed_improved_no_q": 18,
+    "completed_q_learning": 19,
+    "hit_tick_limit_improved_no_q": 2,
+    "hit_tick_limit_q_learning": 1,
+    "ticks_when_both_complete": {
+      "n_pairs": 18,
+      "improved_no_q_mean": 291.94444444444446,
+      "q_learning_mean": 279.1666666666667,
+      "paired_difference_q_minus_improved": -12.777777777777779,
+      "median_difference": -16.0
+    },
+    "metrics_until_completion_or_limit": {
+      "cobertura_pct": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 97.51243781094527,
+        "q_learning_mean_until_completion_or_limit": 99.5273631840796,
+        "paired_difference_q_minus_improved": 2.0149253731343286,
+        "median_difference": 0.0
+      },
+      "distancia_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 553.2,
+        "q_learning_mean_until_completion_or_limit": 542.6,
+        "paired_difference_q_minus_improved": -10.6,
+        "median_difference": -17.5
+      },
+      "combustible_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 679.63,
+        "q_learning_mean_until_completion_or_limit": 649.22,
+        "paired_difference_q_minus_improved": -30.409999999999997,
+        "median_difference": -43.200000000000045
+      },
+      "espera_total": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 730.95,
+        "q_learning_mean_until_completion_or_limit": 291.35,
+        "paired_difference_q_minus_improved": -439.6,
+        "median_difference": -2.0
+      },
+      "colisiones": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "acciones_rechazadas": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "resiembras": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 0,
+        "q_learning_mean_until_completion_or_limit": 0,
+        "paired_difference_q_minus_improved": 0,
+        "median_difference": 0.0
+      },
+      "visitas_S": {
+        "n_pairs": 20,
+        "improved_no_q_mean_until_completion_or_limit": 5.8,
+        "q_learning_mean_until_completion_or_limit": 5.95,
+        "paired_difference_q_minus_improved": 0.15,
+        "median_difference": 0.0
+      }
+    }
+  }
+}
