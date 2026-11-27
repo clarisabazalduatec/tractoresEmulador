@@ -13,6 +13,7 @@ from .blackboard import Blackboard
 from .planner import strips, zigzag_order
 from .rules import WorldState, objective
 from .world import build_field, load_params, validate_params
+from .qlearning import SeedPolicy
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent.parent / "config" / "params.yaml"
 AGENT_CLASSES = {"baseline": TractorAgent, "improved": ImprovedTractor}          # 'improved' llega en la etapa 3
@@ -29,6 +30,12 @@ class FarmModel(ap.Model):
             cfg["field"]["obstacle_density"] = float(self.p["obstacle_density"])
         validate_params(cfg)
         self.cfg, self.arch = cfg, arch
+        if self.p.get('q_enabled', False) and arch != 'improved':
+            raise ValueError('Q-learning requiere la arquitectura improved')
+        if self.p.get('q_enabled', False):
+            self.q_policies = self.p.get('q_policies') or [SeedPolicy(seed=i) for i in range(cfg['tractors']['count'])]
+            if len(self.q_policies) != cfg['tractors']['count']:
+                raise ValueError('Se requiere una política por tractor')
         field = build_field(cfg, rng=self.nprandom)
         self.world = WorldState(field, cfg, rng=self.nprandom)
         n = cfg["tractors"]["count"]
@@ -59,6 +66,9 @@ class FarmModel(ap.Model):
         self.record("colisiones", w.collisions)
 
     def end(self):
+        if self.p.get('q_enabled', False):
+            for agent in self.agents:
+                agent._q_observe(terminal=True)
         w, s = self.world, self.world.summary()
         for k, v in s.items():
             if isinstance(v, list):
